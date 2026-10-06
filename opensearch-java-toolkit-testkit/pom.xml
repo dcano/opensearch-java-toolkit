@@ -71,6 +71,15 @@
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
 		</dependency>
+
+		<!-- Test scope only, unlike everything above: a logging backend is the consuming
+		     application's choice, and shipping one would clash with theirs. This one just gives
+		     Testcontainers somewhere to log during this module's own tests. -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

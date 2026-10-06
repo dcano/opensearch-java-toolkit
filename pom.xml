@@ -39,6 +39,7 @@
 		<slf4j-api.version>2.0.18</slf4j-api.version>
 		<jackson-annotations.version>2.21</jackson-annotations.version>
 		<maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+		<maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -139,6 +140,11 @@
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j-api.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j-api.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -152,6 +158,16 @@
 
 	<build>
 		<plugins>
+			<!-- Testcontainers loads native code through JNA; JDK 24+ warns on that unless the
+			     test JVM grants native access explicitly. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<argLine>--enable-native-access=ALL-UNNAMED</argLine>
+				</configuration>
+			</plugin>
 			<!-- The toolkit exists to be reusable, which is only true while it depends on no
 			     application. Stating the direction in prose would leave it to memory; an
 			     enforcer rule fails the build the first time someone reaches the other way. -->
