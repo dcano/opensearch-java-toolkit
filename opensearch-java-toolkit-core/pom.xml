@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.twba</groupId>
+		<artifactId>opensearch-java-toolkit</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>opensearch-java-toolkit-core</artifactId>
+	<name>opensearch-java-toolkit-core</name>
+	<description>The contracts and crypto the rest of the toolkit is written against.
+	             Zero OpenSearch imports, so it is unit-testable without a cluster.</description>
+
+	<dependencies>
+		<!-- Test scope only. This module must stay runnable on the JDK alone: the moment it
+		     needs a search engine to be exercised, "unit-testable without a cluster" stops
+		     being true and the crypto stops being cheap to pin. Versions come from the
+		     Spring Boot parent. -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>

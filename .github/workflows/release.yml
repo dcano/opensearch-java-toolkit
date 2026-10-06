@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type — patch keeps current version, minor/major bump it (e.g. 0.1.0-SNAPSHOT + major → 1.0.0)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Calculate versions
+        id: versions
+        run: |
+          CURRENT=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout --no-transfer-progress)
+          BASE=${CURRENT%-SNAPSHOT}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+
+          case "${{ inputs.release_type }}" in
+            major) RELEASE="$((MAJOR + 1)).0.0" ;;
+            minor) RELEASE="${MAJOR}.$((MINOR + 1)).0" ;;
+            patch) RELEASE="${MAJOR}.${MINOR}.${PATCH}" ;;
+          esac
+
+          IFS='.' read -r R_MAJOR R_MINOR R_PATCH <<< "$RELEASE"
+          NEXT="${R_MAJOR}.${R_MINOR}.$((R_PATCH + 1))-SNAPSHOT"
+
+          echo "current=$CURRENT"
+          echo "release=$RELEASE"
+          echo "next=$NEXT"
+
+          echo "release=$RELEASE" >> $GITHUB_OUTPUT
+          echo "next=$NEXT"       >> $GITHUB_OUTPUT
+
+      - name: Set release version ${{ steps.versions.outputs.release }}
+        run: ./mvnw --no-transfer-progress versions:set -DnewVersion=${{ steps.versions.outputs.release }} -DgenerateBackupPoms=false
+
+      - name: Build and test
+        run: ./mvnw --no-transfer-progress --batch-mode clean verify
+
+      - name: Publish ${{ steps.versions.outputs.release }} to GitHub Packages
+        run: ./mvnw --no-transfer-progress --batch-mode deploy -DskipTests -s .mvn/settings.xml
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and tag v${{ steps.versions.outputs.release }}
+        run: |
+          git add -A
+          git commit -m "release: v${{ steps.versions.outputs.release }}"
+          git tag "v${{ steps.versions.outputs.release }}"
+
+      - name: Set next development version ${{ steps.versions.outputs.next }}
+        run: ./mvnw --no-transfer-progress versions:set -DnewVersion=${{ steps.versions.outputs.next }} -DgenerateBackupPoms=false
+
+      - name: Commit next development version
+        run: |
+          git add -A
+          git commit -m "chore: prepare next development version ${{ steps.versions.outputs.next }}"
+
+      - name: Push commits and tag
+        run: git push origin HEAD --tags

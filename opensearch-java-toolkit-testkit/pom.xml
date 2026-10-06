@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.twba</groupId>
+		<artifactId>opensearch-java-toolkit</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>opensearch-java-toolkit-testkit</artifactId>
+	<name>opensearch-java-toolkit-testkit</name>
+	<description>The conformance suite and container fixture a domain module runs to prove it wired the
+	             toolkit correctly. Its main sources are test infrastructure: a domain module depends on
+	             this in test scope, which is why JUnit, AssertJ and Testcontainers are compile-scoped
+	             here and nowhere else in the toolkit.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.twba</groupId>
+			<artifactId>opensearch-java-toolkit-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.twba</groupId>
+			<artifactId>opensearch-java-toolkit-opensearch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.opensearch.client</groupId>
+			<artifactId>opensearch-java</artifactId>
+		</dependency>
+
+		<!-- Compile scope, deliberately. What this module ships IS test code: the conformance
+		     suite is a set of assertions a domain module runs, so the assertion library is part
+		     of its API rather than an implementation detail of its own tests. -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.opensearch</groupId>
+			<artifactId>opensearch-testcontainers</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+		</dependency>
+		<!-- Compile scope for the same reason as the rest: a domain module that declares a
+		     @Container from this testkit needs the JUnit lifecycle extension that manages it, and
+		     making it work out of the box is this module's job rather than each module's. -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+		</dependency>
+
+		<!-- The container fixture builds a client the same way an application would: HTTPS,
+		     basic auth, JSR-310 dates. A domain module should not have to reproduce that to run
+		     the suite. -->
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>

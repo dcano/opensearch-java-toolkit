@@ -1,0 +1,35 @@
+name: Build and Publish
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and verify
+        run: ./mvnw --no-transfer-progress --batch-mode clean verify
+
+      - name: Publish to GitHub Packages
+        if: github.event_name == 'push'
+        run: ./mvnw --no-transfer-progress --batch-mode deploy -DskipTests -s .mvn/settings.xml
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

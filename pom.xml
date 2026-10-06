@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.twba</groupId>
+		<artifactId>opensearch-java-ra</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>opensearch-java-toolkit</artifactId>
+	<packaging>pom</packaging>
+	<name>opensearch-java-toolkit</name>
+	<description>Domain-neutral multi-tenant search toolkit: control plane, write path, secure fields,
+	             search execution and provisioning, with no application vocabulary anywhere in it.</description>
+
+	<modules>
+		<module>opensearch-java-toolkit-core</module>
+		<module>opensearch-java-toolkit-opensearch</module>
+		<module>opensearch-java-toolkit-testkit</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<!-- The toolkit exists to be reusable, which is only true while it depends on no
+			     application. Stating the direction in prose would leave it to memory; an
+			     enforcer rule fails the build the first time someone reaches the other way. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>ban-application-dependencies</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<bannedDependencies>
+									<excludes>
+										<exclude>io.twba:opensearch-java-ra-*</exclude>
+										<exclude>io.twba:opensearch-java-labresults</exclude>
+									</excludes>
+									<message>A toolkit module may not depend on the kata or on an application domain module — the dependency runs the other way.</message>
+								</bannedDependencies>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

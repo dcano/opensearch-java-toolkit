@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.twba</groupId>
+		<artifactId>opensearch-java-toolkit</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>opensearch-java-toolkit-opensearch</artifactId>
+	<name>opensearch-java-toolkit-opensearch</name>
+	<description>The OpenSearch adapters: control plane, write path, secure documents, search execution
+	             and provisioning, all addressed by (domain, tenant) and naming no index literally.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.twba</groupId>
+			<artifactId>opensearch-java-toolkit-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.opensearch.client</groupId>
+			<artifactId>opensearch-java</artifactId>
+		</dependency>
+		<!-- Backpressure retries for bulk indexing: on 429 back off exponentially and shrink
+		     the batch, because the cluster telling you to slow down is the system working. -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-retry</artifactId>
+		</dependency>
+		<!-- Per-tenant throttling of sensitive-identifier probes: the prefix index is an online
+		     guessing oracle, and a rate limit is what turns "expensive to invert" into "slow
+		     enough that the audit trail catches it first". -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-ratelimiter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+		<!-- The audit adapter logs to a named logger, and that name is a routing key rather than
+		     an implementation detail, so the API it is routed through is declared rather than
+		     inherited transitively from the client. -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<!-- @JsonValue on SecureDocument, so a map-backed document serializes as the map it is
+		     rather than as a wrapper object. Declared because it is imported, though it also
+		     arrives transitively with opensearch-java. -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<!-- The ISM installer reads an application's policy body as a document so it can insert the
+		     pattern block the toolkit owns, and refuse a body that already claims it. Splicing that
+		     block in as a string would accept a malformed policy and fail at the cluster instead. -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<!-- Test scope only. The control plane is plain Java — catalogs and resolvers run without
+		     a cluster — so its tests stay unit tests. Versions come from the Spring Boot parent. -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>
