@@ -2,14 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>io.twba</groupId>
-		<artifactId>opensearch-java-ra</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
 
-	<artifactId>opensearch-java-toolkit</artifactId>
+	<groupId>io.twba</groupId>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<artifactId>opensearch-java-toolkit</artifactId>
+
 	<name>opensearch-java-toolkit</name>
 	<description>Domain-neutral multi-tenant search toolkit: control plane, write path, secure fields,
 	             search execution and provisioning, with no application vocabulary anywhere in it.</description>
@@ -19,6 +17,129 @@
 		<module>opensearch-java-toolkit-opensearch</module>
 		<module>opensearch-java-toolkit-testkit</module>
 	</modules>
+
+	<properties>
+		<java.version>25</java.version>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<opensearch-java.version>3.9.0</opensearch-java.version>
+		<httpclient5.version>5.4.2</httpclient5.version>
+		<!-- httpclient5 5.4.x is built against httpcore5 5.3.x. opensearch-java pulls
+		     httpcore5/httpcore5-h2 5.4.2, whose ClientH2UpgradeHandler constructor
+		     changed -> NoSuchMethodError at HTTP/2 negotiation. Pin core back to 5.3.x. -->
+		<httpcore5.version>5.3.3</httpcore5.version>
+		<jackson-databind.version>2.21.4</jackson-databind.version>
+		<opensearch-testcontainers.version>4.1.0</opensearch-testcontainers.version>
+		<resilience4j.version>2.3.0</resilience4j.version>
+		<assertj.version>3.27.7</assertj.version>
+		<junit-jupiter.version>6.0.3</junit-jupiter.version>
+		<testcontainers.version>2.0.5</testcontainers.version>
+		<micrometer-core.version>1.17.0</micrometer-core.version>
+		<slf4j-api.version>2.0.18</slf4j-api.version>
+		<jackson-annotations.version>2.21</jackson-annotations.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.twba</groupId>
+				<artifactId>opensearch-java-toolkit-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.twba</groupId>
+				<artifactId>opensearch-java-toolkit-opensearch</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.opensearch.client</groupId>
+				<artifactId>opensearch-java</artifactId>
+				<version>${opensearch-java.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>${httpclient5.version}</version>
+			</dependency>
+			<!-- Force httpcore5 to the line httpclient5 5.4.2 expects, overriding the
+			     5.4.2 that opensearch-java drags in transitively. -->
+			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<artifactId>httpcore5</artifactId>
+				<version>${httpcore5.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<artifactId>httpcore5-h2</artifactId>
+				<version>${httpcore5.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson-databind.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.opensearch</groupId>
+				<artifactId>opensearch-testcontainers</artifactId>
+				<version>${opensearch-testcontainers.version}</version>
+			</dependency>
+			<!-- Backpressure retries for bulk indexing (doc 8.1, rule 2). -->
+			<dependency>
+				<groupId>io.github.resilience4j</groupId>
+				<artifactId>resilience4j-retry</artifactId>
+				<version>${resilience4j.version}</version>
+			</dependency>
+			<!-- Per-tenant throttling of blind-index probes: the prefix index is an online
+			     guessing oracle, and a rate limit is what turns "expensive to invert" into
+			     "slow enough to notice". -->
+			<dependency>
+				<groupId>io.github.resilience4j</groupId>
+				<artifactId>resilience4j-ratelimiter</artifactId>
+				<version>${resilience4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${assertj.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>${testcontainers.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-junit-jupiter</artifactId>
+				<version>${testcontainers.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-core</artifactId>
+				<version>${micrometer-core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-jsr310</artifactId>
+				<version>${jackson-databind.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${jackson-annotations.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-api.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
