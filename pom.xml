@@ -142,6 +142,14 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/dcano/opensearch-java-toolkit</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<!-- The toolkit exists to be reusable, which is only true while it depends on no
